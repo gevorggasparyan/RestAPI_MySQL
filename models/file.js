@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const User = require('./user');
 
 const File = sequelize.define('File', {
     id: {
@@ -27,6 +28,14 @@ const File = sequelize.define('File', {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW
+    },
+    userId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        references: {
+            model: User,
+            key: 'id'
+        }
     }
 });
 
