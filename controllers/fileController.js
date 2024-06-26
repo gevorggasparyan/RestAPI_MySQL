@@ -1,67 +1,40 @@
+const catchAsync = require('../utils/catchAsync');
 const fileService = require('../services/fileService');
+const { AppError } = require('../middleware/errorMiddleware');
 
 exports.uploadMiddleware = fileService.uploadMiddleware;
 
-exports.uploadFile = async (req, res) => {
-    try {
-        const file = await fileService.uploadFile(req.file);
-        res.json(file);
-    } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
-    }
-};
+exports.uploadFile = catchAsync(async (req, res, next) => {
+    const file = await fileService.uploadFile(req.file);
+    res.json(file);
+});
 
-exports.listFiles = async (req, res) => {
+exports.listFiles = catchAsync(async (req, res, next) => {
     const { list_size, page } = req.query;
+    const files = await fileService.listFiles(list_size, page);
+    res.json(files);
+});
 
-    try {
-        const files = await fileService.listFiles(list_size, page);
-        res.json(files);
-    } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
-    }
-};
-
-exports.getFileInfo = async (req, res) => {
+exports.getFileInfo = catchAsync(async (req, res, next) => {
     const { id } = req.params;
+    const file = await fileService.getFileInfo(id);
+    res.json(file);
+});
 
-    try {
-        const file = await fileService.getFileInfo(id);
-        res.json(file);
-    } catch (error) {
-        res.status(404).json({ error: error.message });
-    }
-};
-
-exports.downloadFile = async (req, res) => {
+exports.downloadFile = catchAsync(async (req, res, next) => {
     const { id } = req.params;
+    const filePath = await fileService.downloadFile(id);
+    res.download(filePath);
+});
 
-    try {
-        const filePath = await fileService.downloadFile(id);
-        res.download(filePath);
-    } catch (error) {
-        res.status(404).json({ error: error.message });
-    }
-};
-
-exports.updateFile = async (req, res) => {
+exports.updateFile = catchAsync(async (req, res, next) => {
     const { id } = req.params;
+    const file = await fileService.updateFile(id, req.file);
+    res.json(file);
+});
 
-    try {
-        const file = await fileService.updateFile(id, req.file);
-        res.json(file);
-    } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
-    }
-};
-
-exports.deleteFile = async (req, res) => {
+exports.deleteFile = catchAsync(async (req, res, next) => {
     const { id } = req.params;
-
-    try {
-        await fileService.deleteFile(id);
-        res.json({ message: 'File deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
-    }
-};
+    await fileService.deleteFile(id);
+    res.json({ message: 'File deleted successfully' });
+});
